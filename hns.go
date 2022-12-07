@@ -85,7 +85,7 @@ func (e HNS) Query(domain string, name string, qtype uint16, do bool) ([]dns.RR,
 		case dns.TypeSOA:
 			results, err = e.handleSOA(name, domain, contentHash)
 		case dns.TyphNS:
-			results, err = e.handlhNS(name, domain, contentHash)
+			results, err = e.handleNS(name, domain, contentHash)
 		case dns.TypeTXT:
 			results, err = e.handleTXT(name, domain, contentHash)
 		case dns.TypeA:
@@ -134,7 +134,7 @@ func (e HNS) handleSOA(name string, domain string, contentHash []byte) ([]dns.RR
 	return results, nil
 }
 
-func (e HNS) handlhNS(name string, domain string, contentHash []byte) ([]dns.RR, error) {
+func (e HNS) handleNS(name string, domain string, contentHash []byte) ([]dns.RR, error) {
 	results := make([]dns.RR, 0)
 	for _, nameserver := range e.EthLinkNameServers {
 		result, err := dns.NewRR(fmt.Sprintf("%s 3600 IN NS %s", domain, nameserver))
