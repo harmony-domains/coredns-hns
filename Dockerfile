@@ -8,8 +8,8 @@ RUN apt-get update && \
     update-ca-certificates
 RUN apt-get -y install ed git golang-go make
 
-ADD . /coredns-hns/
-RUN chmod 755 coredns-hns/build.sh && coredns-hns/build.sh
+ADD . /coredns-1ns/
+RUN chmod 755 coredns-1ns/build.sh && coredns-1ns/build.sh
 
 FROM ubuntu:latest
 COPY --from=0 /etc/ssl/certs /etc/ssl/certs

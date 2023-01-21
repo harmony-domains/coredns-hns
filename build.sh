@@ -16,7 +16,7 @@ echo "Patching plugin config..."
 ed plugin.cfg <<EOED
 /rewrite:rewrite
 a
-hns:github.com/harmony-domains/coredns-hns
+onens:github.com/jw-1ns/coredns-1ns
 .
 w
 q
@@ -26,18 +26,18 @@ EOED
 echo "Patching go modules..."
 ed go.mod <<EOED
 a
-replace github.com/harmony-domains/coredns-hns => ../../coredns-hns
+replace github.com/jw-1ns/coredns-1ns => ../../coredns-1ns
 .
 /^)
 -1
 a
-	github.com/harmony-domains/coredns-hns v0.0.1
+	github.com/jw-1ns/coredns-1ns v0.0.1
 .
 w
 q
 EOED
 
-go get github.com/harmony-domains/coredns-hns@v0.0.1
+go get github.com/jw-1ns/coredns-1ns@v0.0.1
 go get
 go mod download
 

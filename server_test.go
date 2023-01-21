@@ -1,4 +1,4 @@
-package hns
+package onens
 
 import (
 	"testing"
@@ -30,8 +30,8 @@ var server = MockServer{
 	zones: []Zone{
 		{name: "example.com.", records: []Record{
 			{"example.com.", dns.ClassINET, dns.TypeSOA, "example.com. 3600 IN SOA ns1.example.com. hostmaster.example.com. 2 19762 1800 1814400 14400"},
-			{"example.com.", dns.ClassINET, dns.TyphNS, "example.com. 3600 IN NS ns1.example.com."},
-			{"example.com.", dns.ClassINET, dns.TyphNS, "example.com. 3600 IN NS ns2.example.com."},
+			{"example.com.", dns.ClassINET, dns.TypeNS, "example.com. 3600 IN NS ns1.example.com."},
+			{"example.com.", dns.ClassINET, dns.TypeNS, "example.com. 3600 IN NS ns2.example.com."},
 			{"www.example.com.", dns.ClassINET, dns.TypeCNAME, "www.example.com. 3600 IN CNAME example.com."},
 			{"ns1.example.com.", dns.ClassINET, dns.TypeA, "ns1.example.com. 3600 IN A 1.1.1.1"},
 			{"ns2.example.com.", dns.ClassINET, dns.TypeA, "ns2.example.com. 3600 IN A 1.1.1.2"},
@@ -111,11 +111,11 @@ func TestQuery(t *testing.T) {
 		do       bool
 		rrs      []dns.RR
 	}{
-		{"example.com.", "example.com.", dns.TyphNS, false, []dns.RR{
+		{"example.com.", "example.com.", dns.TypeNS, false, []dns.RR{
 			newRR("example.com. 3600 IN NS ns1.example.com."),
 			newRR("example.com. 3600 IN NS ns2.example.com."),
 		}},
-		{"example.net.", "example.net.", dns.TyphNS, false, []dns.RR{}},
+		{"example.net.", "example.net.", dns.TypeNS, false, []dns.RR{}},
 	}
 	for i, tt := range tests {
 		rrs, err := server.Query(tt.zone, tt.domain, tt.resource, tt.do)
@@ -146,7 +146,7 @@ func TestLookup(t *testing.T) {
 			},
 		},
 		{
-			Qname: "example.com.", Qtype: dns.TyphNS,
+			Qname: "example.com.", Qtype: dns.TypeNS,
 			Answer: []dns.RR{
 				test.NS("example.com.   3600    IN  NS  ns1.example.com."),
 				test.NS("example.com.   3600    IN  NS  ns2.example.com."),

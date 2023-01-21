@@ -1,5 +1,5 @@
-// Package hns implements a plugin that returns information held in the Ethereum Name Service.
-package hns
+// Package onens implements a plugin that returns information held in the Ethereum Name Service.
+package onens
 
 import (
 	"bytes"
@@ -12,8 +12,8 @@ import (
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/request"
 	"github.com/ethereum/go-ethereum/ethclient"
-	hns "github.com/harmony-domains/hns-go"
 	lru "github.com/hashicorp/golang-lru"
+	onens "github.com/jw-1ns/go-1ns"
 	"github.com/labstack/gommon/log"
 
 	"github.com/miekg/dns"
@@ -21,29 +21,29 @@ import (
 
 var emptyContentHash = []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
-// HNS is a plugin that returns information held in the Ethereum Name Service.
-type HNS struct {
+// ONENS is a plugin that returns information held in the Onw Name Service.
+type ONENS struct {
 	Next               plugin.Handler
 	Client             *ethclient.Client
-	Registry           *hns.Registry
+	Registry           *onens.Registry
 	EthLinkNameServers []string
 	IPFSGatewayAs      []string
 	IPFSGatewayAAAAs   []string
 }
 
-// IsAuthoritative checks if the HNS plugin is authoritative for a given domain
-func (e HNS) IsAuthoritative(domain string) bool {
+// IsAuthoritative checks if the ONENS plugin is authoritative for a given domain
+func (e ONENS) IsAuthoritative(domain string) bool {
 	controllerAddress, err := e.Registry.Owner(strings.TrimSuffix(domain, "."))
 	if err != nil {
 		return false
 	}
 
-	return controllerAddress != hns.UnknownAddress
+	return controllerAddress != onens.UnknownAddress
 }
 
 // HasRecords checks if there are any records for a specific domain and name.
 // This is used for wildcard eligibility
-func (e HNS) HasRecords(domain string, name string) (bool, error) {
+func (e ONENS) HasRecords(domain string, name string) (bool, error) {
 	// See if this has a contenthash record.
 	resolver, err := e.getResolver(domain)
 	if err != nil {
@@ -63,7 +63,7 @@ func (e HNS) HasRecords(domain string, name string) (bool, error) {
 }
 
 // Query queries a given domain/name/resource combination
-func (e HNS) Query(domain string, name string, qtype uint16, do bool) ([]dns.RR, error) {
+func (e ONENS) Query(domain string, name string, qtype uint16, do bool) ([]dns.RR, error) {
 	log.Debugf("request type %d for name %s in domain %v", qtype, name, domain)
 
 	results := make([]dns.RR, 0)
@@ -73,7 +73,7 @@ func (e HNS) Query(domain string, name string, qtype uint16, do bool) ([]dns.RR,
 	hasContentHash := false
 	var err error
 	if qtype == dns.TypeSOA ||
-		qtype == dns.TyphNS ||
+		qtype == dns.TypeNS ||
 		qtype == dns.TypeTXT ||
 		qtype == dns.TypeA ||
 		qtype == dns.TypeAAAA {
@@ -84,7 +84,7 @@ func (e HNS) Query(domain string, name string, qtype uint16, do bool) ([]dns.RR,
 		switch qtype {
 		case dns.TypeSOA:
 			results, err = e.handleSOA(name, domain, contentHash)
-		case dns.TyphNS:
+		case dns.TypeNS:
 			results, err = e.handleNS(name, domain, contentHash)
 		case dns.TypeTXT:
 			results, err = e.handleTXT(name, domain, contentHash)
@@ -118,7 +118,7 @@ func (e HNS) Query(domain string, name string, qtype uint16, do bool) ([]dns.RR,
 	return results, nil
 }
 
-func (e HNS) handleSOA(name string, domain string, contentHash []byte) ([]dns.RR, error) {
+func (e ONENS) handleSOA(name string, domain string, contentHash []byte) ([]dns.RR, error) {
 	results := make([]dns.RR, 0)
 	if len(e.EthLinkNameServers) > 0 {
 		// Create a synthetic SOA record
@@ -134,7 +134,7 @@ func (e HNS) handleSOA(name string, domain string, contentHash []byte) ([]dns.RR
 	return results, nil
 }
 
-func (e HNS) handleNS(name string, domain string, contentHash []byte) ([]dns.RR, error) {
+func (e ONENS) handleNS(name string, domain string, contentHash []byte) ([]dns.RR, error) {
 	results := make([]dns.RR, 0)
 	for _, nameserver := range e.EthLinkNameServers {
 		result, err := dns.NewRR(fmt.Sprintf("%s 3600 IN NS %s", domain, nameserver))
@@ -147,7 +147,7 @@ func (e HNS) handleNS(name string, domain string, contentHash []byte) ([]dns.RR,
 	return results, nil
 }
 
-func (e HNS) handleTXT(name string, domain string, contentHash []byte) ([]dns.RR, error) {
+func (e ONENS) handleTXT(name string, domain string, contentHash []byte) ([]dns.RR, error) {
 	results := make([]dns.RR, 0)
 	txtRRSet, err := e.obtainTXTRRSet(name, domain)
 	if err == nil && len(txtRRSet) != 0 {
@@ -178,7 +178,7 @@ func (e HNS) handleTXT(name string, domain string, contentHash []byte) ([]dns.RR
 			return results, nil
 		}
 
-		if address != hns.UnknownAddress {
+		if address != onens.UnknownAddress {
 			result, err := dns.NewRR(fmt.Sprintf("%s 3600 IN TXT \"a=%s\"", name, address.Hex()))
 			if err != nil {
 				return results, err
@@ -193,7 +193,7 @@ func (e HNS) handleTXT(name string, domain string, contentHash []byte) ([]dns.RR
 		results = append(results, result)
 
 		// Also provide dnslink for compatibility with older IPFS gateways
-		contentHashStr, err := hns.ContenthashToString(contentHash)
+		contentHashStr, err := onens.ContenthashToString(contentHash)
 		if err != nil {
 			return results, err
 		}
@@ -204,7 +204,7 @@ func (e HNS) handleTXT(name string, domain string, contentHash []byte) ([]dns.RR
 		results = append(results, result)
 	} else if isRealOnChainDomain(strings.TrimPrefix(name, "_dnslink."), domain) {
 		// This is a request to _dnslink.<domain>, return the DNS link record.
-		contentHashStr, err := hns.ContenthashToString(contentHash)
+		contentHashStr, err := onens.ContenthashToString(contentHash)
 		if err != nil {
 			return results, err
 		}
@@ -218,7 +218,7 @@ func (e HNS) handleTXT(name string, domain string, contentHash []byte) ([]dns.RR
 	return results, nil
 }
 
-func (e HNS) handleA(name string, domain string, contentHash []byte) ([]dns.RR, error) {
+func (e ONENS) handleA(name string, domain string, contentHash []byte) ([]dns.RR, error) {
 	results := make([]dns.RR, 0)
 
 	aRRSet, err := e.obtainARRSet(name, domain)
@@ -246,7 +246,7 @@ func (e HNS) handleA(name string, domain string, contentHash []byte) ([]dns.RR, 
 	return results, nil
 }
 
-func (e HNS) handleAAAA(name string, domain string, contentHash []byte) ([]dns.RR, error) {
+func (e ONENS) handleAAAA(name string, domain string, contentHash []byte) ([]dns.RR, error) {
 	results := make([]dns.RR, 0)
 
 	aaaaRRSet, err := e.obtainAAAARRSet(name, domain)
@@ -274,7 +274,7 @@ func (e HNS) handleAAAA(name string, domain string, contentHash []byte) ([]dns.R
 }
 
 // ServeDNS implements the plugin.Handler interface.
-func (e HNS) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (int, error) {
+func (e ONENS) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (int, error) {
 	state := request.Request{W: w, Req: r}
 
 	a := new(dns.Msg)
@@ -305,7 +305,7 @@ func (e HNS) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (in
 
 }
 
-func (e HNS) obtainARRSet(name string, domain string) ([]byte, error) {
+func (e ONENS) obtainARRSet(name string, domain string) ([]byte, error) {
 	ethDomain := strings.TrimSuffix(domain, ".")
 	resolver, err := e.getDNSResolver(ethDomain)
 	if err != nil {
@@ -315,7 +315,7 @@ func (e HNS) obtainARRSet(name string, domain string) ([]byte, error) {
 	return resolver.Record(name, dns.TypeA)
 }
 
-func (e HNS) obtainAAAARRSet(name string, domain string) ([]byte, error) {
+func (e ONENS) obtainAAAARRSet(name string, domain string) ([]byte, error) {
 	ethDomain := strings.TrimSuffix(domain, ".")
 	resolver, err := e.getDNSResolver(ethDomain)
 	if err != nil {
@@ -325,7 +325,7 @@ func (e HNS) obtainAAAARRSet(name string, domain string) ([]byte, error) {
 	return resolver.Record(name, dns.TypeAAAA)
 }
 
-func (e HNS) obtainContentHash(name string, domain string) ([]byte, error) {
+func (e ONENS) obtainContentHash(name string, domain string) ([]byte, error) {
 	ethDomain := strings.TrimSuffix(domain, ".")
 	resolver, err := e.getResolver(ethDomain)
 	if err != nil {
@@ -335,7 +335,7 @@ func (e HNS) obtainContentHash(name string, domain string) ([]byte, error) {
 	return resolver.Contenthash()
 }
 
-func (e HNS) obtainTXTRRSet(name string, domain string) ([]byte, error) {
+func (e ONENS) obtainTXTRRSet(name string, domain string) ([]byte, error) {
 	ethDomain := strings.TrimSuffix(domain, ".")
 	resolver, err := e.getDNSResolver(ethDomain)
 	if err != nil {
@@ -346,7 +346,7 @@ func (e HNS) obtainTXTRRSet(name string, domain string) ([]byte, error) {
 }
 
 // Name implements the Handler interface.
-func (e HNS) Name() string { return "hns" }
+func (e ONENS) Name() string { return "onens" }
 
 // isRealOnChainDomain will return true if the name requested
 // is also the domain, which implies the entry has an on-chain
@@ -363,9 +363,9 @@ func init() {
 	dnsResolverCache, _ = lru.New(16)
 }
 
-func (e *HNS) getDNSResolver(domain string) (*hns.DNSResolver, error) {
+func (e *ONENS) getDNSResolver(domain string) (*onens.DNSResolver, error) {
 	if !dnsResolverCache.Contains(domain) {
-		resolver, err := hns.NewDNSResolver(e.Client, domain)
+		resolver, err := onens.NewDNSResolver(e.Client, domain)
 		if err == nil {
 			dnsResolverCache.Add(domain, resolver)
 		} else {
@@ -379,19 +379,19 @@ func (e *HNS) getDNSResolver(domain string) (*hns.DNSResolver, error) {
 	if resolver == nil {
 		return nil, errors.New("no resolver")
 	}
-	return resolver.(*hns.DNSResolver), nil
+	return resolver.(*onens.DNSResolver), nil
 }
 
-func (e *HNS) newDNSResolver(domain string) (*hns.DNSResolver, error) {
+func (e *ONENS) newDNSResolver(domain string) (*onens.DNSResolver, error) {
 	// Obtain the resolver address for this domain
 	resolver, err := e.Registry.ResolverAddress(domain)
 	if err != nil {
 		return nil, err
 	}
-	return hns.NewDNSResolverAt(e.Client, domain, resolver)
+	return onens.NewDNSResolverAt(e.Client, domain, resolver)
 }
 
-func (e *HNS) getResolver(domain string) (*hns.Resolver, error) {
+func (e *ONENS) getResolver(domain string) (*onens.Resolver, error) {
 	if !resolverCache.Contains(domain) {
 		resolver, err := e.newResolver(domain)
 		if err == nil {
@@ -407,20 +407,20 @@ func (e *HNS) getResolver(domain string) (*hns.Resolver, error) {
 	if resolver == nil {
 		return nil, errors.New("no resolver")
 	}
-	return resolver.(*hns.Resolver), nil
+	return resolver.(*onens.Resolver), nil
 }
 
-func (e *HNS) newResolver(domain string) (*hns.Resolver, error) {
+func (e *ONENS) newResolver(domain string) (*onens.Resolver, error) {
 	// Obtain the resolver address for this domain
 	resolver, err := e.Registry.ResolverAddress(domain)
 	if err != nil {
 		return nil, err
 	}
-	return hns.NewResolverAt(e.Client, domain, resolver)
+	return onens.NewResolverAt(e.Client, domain, resolver)
 }
 
 // Ready returns true if we're ready to serve DNS records i.e. our chain is synced
-func (e HNS) Ready() bool {
+func (e ONENS) Ready() bool {
 	progress, err := e.Client.SyncProgress(context.Background())
 	if err != nil {
 		return false

@@ -1,4 +1,4 @@
-package hns
+package onens
 
 import (
 	"github.com/coredns/coredns/plugin/pkg/dnsutil"

@@ -1,4 +1,4 @@
-package hns
+package onens
 
 import (
 	"strings"
@@ -168,8 +168,8 @@ func Lookup(server Server, state request.Request) ([]dns.RR, []dns.RR, []dns.RR,
 		}
 	}
 
-	if qtype == dns.TyphNS {
-		nsRrs, err := server.Query(domain, domain, dns.TyphNS, do)
+	if qtype == dns.TypeNS {
+		nsRrs, err := server.Query(domain, domain, dns.TypeNS, do)
 		if err != nil {
 			return nil, nil, nil, ServerFailure
 		}

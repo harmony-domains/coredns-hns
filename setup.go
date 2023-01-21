@@ -1,4 +1,4 @@
-package hns
+package onens
 
 import (
 	"strings"
@@ -7,35 +7,35 @@ import (
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
 	"github.com/ethereum/go-ethereum/ethclient"
-	hns "github.com/harmony-domains/go-hns"
+	onens "github.com/jw-1ns/go-1ns"
 )
 
 func init() {
-	caddy.RegisterPlugin("hns", caddy.Plugin{
+	caddy.RegisterPlugin("onens", caddy.Plugin{
 		ServerType: "dns",
-		Action:     setupHNS,
+		Action:     setupONENS,
 	})
 }
 
-func setupHNS(c *caddy.Controller) error {
-	connection, ethLinkNameServers, ipfsGatewayAs, ipfsGatewayAAAAs, err := hnsParse(c)
+func setupONENS(c *caddy.Controller) error {
+	connection, ethLinkNameServers, ipfsGatewayAs, ipfsGatewayAAAAs, err := onensParse(c)
 	if err != nil {
-		return plugin.Error("hns", err)
+		return plugin.Error("onens", err)
 	}
 
 	client, err := ethclient.Dial(connection)
 	if err != nil {
-		return plugin.Error("hns", err)
+		return plugin.Error("onens", err)
 	}
 
 	// Obtain the registry contract
-	registry, err := hns.NewRegistry(client)
+	registry, err := onens.NewRegistry(client)
 	if err != nil {
-		return plugin.Error("hns", err)
+		return plugin.Error("onens", err)
 	}
 
 	dnsserver.GetConfig(c).AddPlugin(func(next plugin.Handler) plugin.Handler {
-		return HNS{
+		return ONENS{
 			Next:               next,
 			Client:             client,
 			EthLinkNameServers: ethLinkNameServers,
@@ -48,7 +48,7 @@ func setupHNS(c *caddy.Controller) error {
 	return nil
 }
 
-func hnsParse(c *caddy.Controller) (string, []string, []string, []string, error) {
+func onensParse(c *caddy.Controller) (string, []string, []string, []string, error) {
 	var connection string
 	ethLinkNameServers := make([]string, 0)
 	ipfsGatewayAs := make([]string, 0)

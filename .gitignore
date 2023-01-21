@@ -20,3 +20,9 @@ coverage.html
 
 # Local TODO
 TODO.md
+
+# Local build
+build
+
+# Visual Studio files
+.vscode
