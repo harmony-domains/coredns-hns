@@ -22,6 +22,10 @@ go build
 
 ```
 
+## Updating configuration
+There are two configurtion files needed included in the repository and copied at time of bulding the standalone test environment
+* `.env` contains environment variables for go-1ns including client connection info and deployed contract addresses
+* `Corefile` contains zone and server information see [here](https://coredns.io/2017/07/23/corefile-explained/) for more information.
 ## Running go tests
 
 
