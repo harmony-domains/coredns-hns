@@ -54,3 +54,4 @@ cd ${SRCDIR}
 rm -r ${BUILDDIR}
 
 cp Corefile.local Corefile
+cp .env.local .env

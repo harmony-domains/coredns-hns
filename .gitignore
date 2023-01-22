@@ -26,3 +26,6 @@ build
 
 # Visual Studio files
 .vscode
+
+# Environment configuration file
+.env

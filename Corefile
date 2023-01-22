@@ -8,7 +8,7 @@
     name regex (.*)\.country\.link {1}.country
     answer name (.*)\.country {1}.country.link
     }
-    onensbad {
+    onens {
         # connection is the connection to an Ethereum node.  It is *highly*
         # recommended that a local node is used, as remote connections can
         # cause DNS requests to time out.
