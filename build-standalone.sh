@@ -32,20 +32,25 @@ replace github.com/jw-1ns/coredns-1ns => ../..
 /^)
 -1
 a
-	github.com/jw-1ns/coredns-1ns v0.1.0
+	github.com/jw-1ns/coredns-1ns v0.1.1
 .
 w
 q
 EOED
 
-go get github.com/jw-1ns/coredns-1ns@v0.1.0
+go get github.com/jw-1ns/coredns-1ns@v0.1.1
 go get
 go mod download
 
 echo "Building..."
-make SHELL='sh -x' CGO_ENABLED=1 coredns
+# make SHELL='sh -x' CGO_ENABLED=1 coredns
+go generate
+go build
+# make
 
 cp coredns ${SRCDIR}
 chmod -R 755 .git
 cd ${SRCDIR}
 rm -r ${BUILDDIR}
+
+cp Corefile.local Corefile
