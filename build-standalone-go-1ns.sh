@@ -33,13 +33,13 @@ replace github.com/jw-1ns/go-1ns => ../../../go-1ns
 /^)
 -1
 a
-	github.com/jw-1ns/coredns-1ns v0.1.1
+	github.com/jw-1ns/coredns-1ns v0.1.2
 .
 w
 q
 EOED
 
-go get github.com/jw-1ns/coredns-1ns@v0.1.1
+go get github.com/jw-1ns/coredns-1ns@v0.1.2
 go get
 go mod download
 

@@ -7,7 +7,7 @@ require (
 	github.com/coredns/coredns v1.10.1
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d
-	github.com/jw-1ns/go-1ns v0.1.4
+	github.com/jw-1ns/go-1ns v0.1.5
 	github.com/labstack/gommon v0.4.0
 	github.com/miekg/dns v1.1.50
 )
