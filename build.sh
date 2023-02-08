@@ -10,7 +10,7 @@ echo "Cloning coredns repo..."
 git clone https://github.com/coredns/coredns.git
 
 cd coredns
-git checkout v1.8.3
+git checkout v1.10.0
 
 echo "Patching plugin config..."
 ed plugin.cfg <<EOED
@@ -25,9 +25,6 @@ EOED
 # Add our module to coredns.
 echo "Patching go modules..."
 ed go.mod <<EOED
-a
-replace github.com/jw-1ns/coredns-1ns => ../../coredns-1ns
-.
 /^)
 -1
 a
