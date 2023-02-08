@@ -1,6 +1,7 @@
 package onens
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/coredns/caddy"
@@ -23,6 +24,7 @@ func setupONENS(c *caddy.Controller) error {
 		return plugin.Error("onens", err)
 	}
 
+	fmt.Printf("connection: %+v\n", connection)
 	client, err := ethclient.Dial(connection)
 	if err != nil {
 		return plugin.Error("onens", err)
@@ -31,6 +33,7 @@ func setupONENS(c *caddy.Controller) error {
 	// Obtain the registry contract
 	registry, err := onens.NewRegistry(client)
 	if err != nil {
+		fmt.Printf("Plugin Error getting connection: %+v\n", err)
 		return plugin.Error("onens", err)
 	}
 

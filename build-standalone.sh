@@ -28,6 +28,7 @@ echo "Patching go modules..."
 ed go.mod <<EOED
 a
 replace github.com/jw-1ns/coredns-1ns => ../..
+replace github.com/jw-1ns/go-1ns => ../../../go-1ns
 .
 /^)
 -1
