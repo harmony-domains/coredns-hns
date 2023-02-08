@@ -33,4 +33,3 @@ build
 # Zone and server configuration
 .Corefile
 Corefile
-Corefile.local
