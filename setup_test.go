@@ -13,8 +13,6 @@ func TestONENSParse(t *testing.T) {
 		err                string
 		connection         string
 		ethlinknameservers []string
-		ipfsgatewayas      []string
-		ipfsgatewayaaaas   []string
 	}{
 		{ // 0
 			".",
@@ -22,8 +20,6 @@ func TestONENSParse(t *testing.T) {
 			}`,
 			"Testfile:2 - Error during parsing: no connection",
 			"",
-			nil,
-			nil,
 			nil,
 		},
 		{ // 1
@@ -33,8 +29,6 @@ func TestONENSParse(t *testing.T) {
 			}`,
 			"Testfile:2 - Error during parsing: invalid connection; no value",
 			"",
-			nil,
-			nil,
 			nil,
 		},
 		{ // 2
@@ -46,8 +40,6 @@ func TestONENSParse(t *testing.T) {
 			"",
 			"/home/test/.ethereum/geth.ipc",
 			[]string{"ns1.ethdns.xyz."},
-			nil,
-			nil,
 		},
 		{ // 3
 			".",
@@ -58,19 +50,15 @@ func TestONENSParse(t *testing.T) {
 			"",
 			"http://localhost:8545/",
 			[]string{"ns1.ethdns.xyz.", "ns2.ethdns.xyz."},
-			nil,
-			nil,
 		},
 		{ // 4
 			".",
 			`onens {
 			  connection http://localhost:8545/
-			  ipfsgatewaya
+			  ethlinknameservers ns1.ethdns.xyz ns2.ethdns.xyz
 			}`,
-			"Testfile:3 - Error during parsing: invalid IPFS gateway A; no value",
 			"",
-			nil,
-			nil,
+			"",
 			nil,
 		},
 		{ // 5
@@ -78,101 +66,48 @@ func TestONENSParse(t *testing.T) {
 			`onens {
 			  connection http://localhost:8545/
 			  ethlinknameservers ns1.ethdns.xyz ns2.ethdns.xyz
-			  ipfsgatewaya 193.62.81.1
 			}`,
 			"",
 			"",
-			nil,
-			[]string{"193.62.81.1"},
 			nil,
 		},
 		{ // 6
-			".",
-			`onens {
-			  connection http://localhost:8545/
-			  ipfsgatewayaaaa
-			}`,
-			"Testfile:3 - Error during parsing: invalid IPFS gateway AAAA; no value",
-			"",
-			nil,
-			nil,
-			nil,
-		},
-		{ // 7
-			".",
-			`onens {
-			  connection http://localhost:8545/
-			  ethlinknameservers ns1.ethdns.xyz ns2.ethdns.xyz
-			  ipfsgatewayaaaa fe80::b8fb:325d:fb5a:40e7
-			}`,
-			"",
-			"",
-			nil,
-			nil,
-			[]string{"fe80::b8fb:325d:fb5a:40e7"},
-		},
-		{ // 8
 			"tls://.:8053",
 			`onens {
 			  connection http://localhost:8545/
 			  ethlinknameservers ns1.ethdns.xyz ns2.ethdns.xyz
-			  ipfsgatewayaaaa fe80::b8fb:325d:fb5a:40e7
 			}`,
 			"",
 			"",
 			nil,
-			nil,
-			[]string{"fe80::b8fb:325d:fb5a:40e7"},
 		},
-		{ // 9
+		{ // 7
 			".:8053",
 			`onens {
 			  connection http://localhost:8545/ bad
-			  ipfsgatewayaaaa fe80::b8fb:325d:fb5a:40e7
 			}`,
 			"Testfile:2 - Error during parsing: invalid connection; multiple values",
 			"",
 			nil,
-			nil,
-			nil,
 		},
-		{ // 10
+		{ // 8
 			".:8053",
 			`onens {
 			  connection http://localhost:8545/
 			  ethlinknameservers ns1.ethdns.xyz ns2.ethdns.xyz
-			  ipfsgatewaya 193.62.81.1 193.62.81.2
 			}`,
 			"",
 			"",
 			nil,
-			[]string{"193.62.81.1", "193.62.81.2"},
-			nil,
 		},
-		{ // 11
+		{ // 9
 			".:8053",
 			`onens {
 			  connection http://localhost:8545/
 			  ethlinknameservers ns1.ethdns.xyz ns2.ethdns.xyz
-			  ipfsgatewayaaaa fe80::b8fb:325d:fb5a:40e7 fe80::b8fb:325d:fb5a:40e8
 			}`,
 			"",
 			"",
-			nil,
-			nil,
-			[]string{"fe80::b8fb:325d:fb5a:40e7", "fe80::b8fb:325d:fb5a:40e8"},
-		},
-		{ // 12
-			".:8053",
-			`onens {
-			  connection http://localhost:8545/
-			  ipfsgatewayaaaa fe80::b8fb:325d:fb5a:40e7 fe80::b8fb:325d:fb5a:40e8
-			  bad
-			}`,
-			"Testfile:4 - Error during parsing: unknown value bad",
-			"",
-			nil,
-			nil,
 			nil,
 		},
 	}
@@ -180,7 +115,7 @@ func TestONENSParse(t *testing.T) {
 	for i, test := range tests {
 		c := caddy.NewTestController("onens", test.inputFileRules)
 		c.Key = test.key
-		connection, ethlinknameservers, ipfsgatewayas, ipfsgatewayaaaas, err := onensParse(c)
+		connection, ethlinknameservers, err := onensParse(c)
 
 		if test.err != "" {
 			if err == nil {
@@ -203,26 +138,6 @@ func TestONENSParse(t *testing.T) {
 					for j := range test.ethlinknameservers {
 						if ethlinknameservers[j] != test.ethlinknameservers[j] {
 							t.Fatalf("Test %d ethlinknameservers expected %v, got %v", i, test.ethlinknameservers[j], ethlinknameservers[j])
-						}
-					}
-				}
-				if test.ipfsgatewayas != nil {
-					if len(ipfsgatewayas) != len(test.ipfsgatewayas) {
-						t.Fatalf("Test %d ipfsgatewayas expected %v entries, got %v", i, len(test.ipfsgatewayas), len(ipfsgatewayas))
-					}
-					for j := range test.ipfsgatewayas {
-						if ipfsgatewayas[j] != test.ipfsgatewayas[j] {
-							t.Fatalf("Test %d ipfsgatewayas expected %v, got %v", i, test.ipfsgatewayas[j], ipfsgatewayas[j])
-						}
-					}
-				}
-				if test.ipfsgatewayaaaas != nil {
-					if len(ipfsgatewayaaaas) != len(test.ipfsgatewayaaaas) {
-						t.Fatalf("Test %d ipfsgatewayaaaas expected %v entries, got %v", i, len(test.ipfsgatewayaaaas), len(ipfsgatewayaaaas))
-					}
-					for j := range test.ipfsgatewayaaaas {
-						if ipfsgatewayaaaas[j] != test.ipfsgatewayaaaas[j] {
-							t.Fatalf("Test %d ipfsgatewayaaaas expected %v, got %v", i, test.ipfsgatewayaaaas[j], ipfsgatewayaaaas[j])
 						}
 					}
 				}

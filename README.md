@@ -39,19 +39,6 @@ The plugin has a number of configuration options.  An example annotated Corefile
     # plus potentially one or more others.
     ethlinknameservers ns1.ethdns.xyz ns2.ethdns.xyz
 
-    # ipfsgatewaya is the address of an ONENS-enabled IPFS gateway.
-    # This value is returned when a request for an A record of an Ethlink
-    # domain is received and the domain has a contenthash record in ONENS but
-    # no A record.  Multiple values can be supplied, separated by a space,
-    # in which case all records will be returned.
-    ipfsgatewaya 176.9.154.81
-
-    # ipfsgatewayaaaa is the address of an ONENS-enabled IPFS gateway.
-    # This value is returned when a request for an AAAA record of an Ethlink
-    # domain is received and the domain has a contenthash record in ONENS but
-    # no A record.  Multiple values can be supplied, separated by a space,
-    # in which case all records will be returned.
-    ipfsgatewayaaaa 2a01:4f8:160:4069::2
   }
 
   # This enables DNS forwarding.  It should only be enabled if this DNS server
