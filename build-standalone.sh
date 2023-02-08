@@ -51,7 +51,7 @@ go build
 cp coredns ${SRCDIR}
 chmod -R 755 .git
 cd ${SRCDIR}
-rm -r ${BUILDDIR}
+# rm -r ${BUILDDIR}
 
 cp Corefile.local Corefile
 cp .env.local .env
