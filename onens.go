@@ -66,42 +66,11 @@ func (e ONENS) Query(domain string, name string, qtype uint16, do bool) ([]dns.R
 
 	results := make([]dns.RR, 0)
 
-	// If the requested domain has a content hash we alter a number of the records returned
-	// var contentHash []byte
-	// hasContentHash := false
-	// var err error
-	// if qtype == dns.TypeSOA ||
-	// 	qtype == dns.TypeNS ||
-	// 	qtype == dns.TypeTXT ||
-	// 	qtype == dns.TypeA ||
-	// 	qtype == dns.TypeAAAA {
-	// 	contentHash, err = e.obtainContentHash(name, domain)
-	// 	hasContentHash = err == nil && bytes.Compare(contentHash, emptyContentHash) > 0
-	// 	fmt.Printf("hasContentHash: %+v\n", hasContentHash)
-	// }
-	// if hasContentHash {
-	// 	switch qtype {
-	// 	case dns.TypeSOA:
-	// 		results, err = e.handleSOA(name, domain, contentHash)
-	// 	case dns.TypeNS:
-	// 		results, err = e.handleNS(name, domain, contentHash)
-	// 	case dns.TypeTXT:
-	// 		results, err = e.handleTXT(name, domain, contentHash)
-	// 	case dns.TypeA:
-	// 		fmt.Println("qtype = A")
-	// 		//   expect(await this.publicResolver.dnsRecord(node, aNameHash, Constants.DNSRecordType.A)).to.equal('0x' + initARec)
-	// 		results, err = e.handleA(name, domain, contentHash)
-	// 	case dns.TypeAAAA:
-	// 		results, err = e.handleAAAA(name, domain, contentHash)
-	// 	}
-	// } else {
-	fmt.Println("Query have no content hash")
 	ethDomain := strings.TrimSuffix(domain, ".")
 	resolver, err := e.getDNSResolver(ethDomain)
 	if err != nil {
 		return results, nil
 	}
-	fmt.Println("Query have domain")
 	data, err := resolver.Record(name, qtype)
 	if err != nil {
 		return results, err

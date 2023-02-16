@@ -21,8 +21,8 @@
         # EthLink domains.  This will usually be the name of this server,
         # plus potentially one or more others.
         # ethlinknameservers ns1.ethdns.xyz ns2.ethdns.xyz
-        # ethlinknameservers ns3.hiddenstate.xyz
-        ethlinknameservers 34.105.31.50 
+        ethlinknameservers ns3.hiddenstate.xyz
+        # ethlinknameservers 34.105.31.50 
 
 
 
