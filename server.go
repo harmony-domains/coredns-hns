@@ -1,6 +1,7 @@
 package onens
 
 import (
+	"context"
 	"strings"
 
 	"github.com/coredns/coredns/request"
@@ -36,6 +37,9 @@ type Server interface {
 	// IsAuthoritative returns true if this server is authoritative for the
 	// supplied domain
 	IsAuthoritative(qdomain string) bool
+
+	// External lookup is used to retrieve ecternal records for CNAME and DNAME querie
+	ExternalLookup(ctx context.Context, state request.Request, target string, qtype uint16) ([]dns.RR, Result)
 }
 
 // Obtain the lowest domain for which we are authoritative
@@ -72,7 +76,7 @@ func highestAuthoritativeDomain(server Server, name string) string {
 
 // Lookup contains the logic required to move through A DNS hierarchy and
 // gather the appropriate records
-func Lookup(server Server, state request.Request) ([]dns.RR, []dns.RR, []dns.RR, Result) {
+func Lookup(server Server, state request.Request, ctx context.Context) ([]dns.RR, []dns.RR, []dns.RR, Result) {
 	qtype := state.QType()
 	do := state.Do()
 
@@ -111,7 +115,7 @@ func Lookup(server Server, state request.Request) ([]dns.RR, []dns.RR, []dns.RR,
 			newReq := state.Req.Copy()
 			newReq.Question[0].Name = synthName
 			newState := request.Request{W: state.W, Req: newReq}
-			dnameAnswerRrs, dnameAuthorityRrs, dnameAdditionalRrs, dnameResult := Lookup(server, newState)
+			dnameAnswerRrs, dnameAuthorityRrs, dnameAdditionalRrs, dnameResult := Lookup(server, newState, ctx)
 			if dnameResult == Success {
 				answerRrs = append(answerRrs, dnameAnswerRrs...)
 				authorityRrs = append(authorityRrs, dnameAuthorityRrs...)
@@ -142,7 +146,7 @@ func Lookup(server Server, state request.Request) ([]dns.RR, []dns.RR, []dns.RR,
 			newReq.Question[0].Name = wildcardName
 			newState := request.Request{W: state.W, Req: newReq}
 
-			wildcardAnswerRrs, wildcardAuthorityRrs, wildcardAdditionalRrs, wildcardResult := Lookup(server, newState)
+			wildcardAnswerRrs, wildcardAuthorityRrs, wildcardAdditionalRrs, wildcardResult := Lookup(server, newState, ctx)
 			if wildcardResult == Success {
 				// Replace the wildcard results with original query results
 				for _, answerRr := range wildcardAnswerRrs {
@@ -210,11 +214,12 @@ func Lookup(server Server, state request.Request) ([]dns.RR, []dns.RR, []dns.RR,
 			newReq.Question[0].Qtype = qtype
 			newState := request.Request{W: state.W, Req: newReq}
 			// Recurse with our new request
-			cnameAnswerRrs, cnameAuthorityRrs, cnameAdditionalrs, cnameResult := Lookup(server, newState)
+			// cnameAnswerRrs, cnameAuthorityRrs, cnameAdditionalrs, cnameResult := Lookup(server, newState)
+			cnameAnswerRrs, cnameResult := server.ExternalLookup(ctx, newState, cname, qtype)
 			if cnameResult == Success {
 				answerRrs = append(answerRrs, cnameAnswerRrs...)
-				authorityRrs = append(authorityRrs, cnameAuthorityRrs...)
-				additionalRrs = append(additionalRrs, cnameAdditionalrs...)
+				// authorityRrs = append(authorityRrs, cnameAuthorityRrs...)
+				// additionalRrs = append(additionalRrs, cnameAdditionalrs...)
 			}
 			return answerRrs, authorityRrs, additionalRrs, cnameResult
 		}
