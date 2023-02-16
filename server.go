@@ -2,7 +2,6 @@ package onens
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/coredns/coredns/request"
@@ -78,7 +77,6 @@ func highestAuthoritativeDomain(server Server, name string) string {
 // Lookup contains the logic required to move through A DNS hierarchy and
 // gather the appropriate records
 func Lookup(server Server, state request.Request, ctx context.Context) ([]dns.RR, []dns.RR, []dns.RR, Result) {
-	fmt.Println("In server Lookup")
 	qtype := state.QType()
 	do := state.Do()
 
@@ -202,16 +200,10 @@ func Lookup(server Server, state request.Request, ctx context.Context) ([]dns.RR
 	// If we aren't asking for a CNAME then check for one to see if we need
 	// to recurse
 	if qtype != dns.TypeCNAME {
-		fmt.Println("In server lookup: qtype != dns.TypeCNAME")
-		fmt.Printf("domain: %+v\n", domain)
-		fmt.Printf("name: %+v\n", name)
-		fmt.Printf("qtype: %+v\n", qtype)
-		fmt.Printf("do: %+v\n", do)
-		cnameRrs, err := server.Query(domain, name, dns.TypeCNAME, true)
+		cnameRrs, err := server.Query(domain, name, dns.TypeCNAME, do)
 		if err != nil {
 			return nil, nil, nil, ServerFailure
 		}
-		fmt.Printf("cnameRrs: %+v\n", cnameRrs)
 		if len(cnameRrs) > 0 {
 			// Found a CNAME; process it
 			answerRrs = append(answerRrs, cnameRrs[0])

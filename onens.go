@@ -65,7 +65,6 @@ func (e ONENS) HasRecords(domain string, name string) (bool, error) {
 // Query queries a given domain/name/resource combination
 func (e ONENS) Query(domain string, name string, qtype uint16, do bool) ([]dns.RR, error) {
 	log.Debugf("request type %d for name %s in domain %v", qtype, name, domain)
-	fmt.Printf("In onens query: request type %d for name %s in domain %v \n", qtype, name, domain)
 
 	results := make([]dns.RR, 0)
 
@@ -74,10 +73,7 @@ func (e ONENS) Query(domain string, name string, qtype uint16, do bool) ([]dns.R
 	if err != nil {
 		return results, nil
 	}
-	fmt.Printf("In onens query- name: %+v\n", name)
-	fmt.Printf("In onens query- qtype: %+v\n", qtype)
 	data, err := resolver.Record(name, qtype)
-	fmt.Printf("In onens query- data: %+v\n", data)
 	if err != nil {
 		return results, err
 	}
@@ -96,8 +92,6 @@ func (e ONENS) Query(domain string, name string, qtype uint16, do bool) ([]dns.R
 }
 
 func (e ONENS) ExternalLookup(ctx context.Context, state request.Request, target string, qtype uint16) ([]dns.RR, Result) {
-	fmt.Printf("In External Lookup: qtype: %+v\n", qtype)
-	fmt.Printf("In External Lookup: target: %+v\n", target)
 	m, err := e.Upstream.Lookup(ctx, state, target, qtype)
 	if err != nil {
 		return nil, ServerFailure
@@ -219,7 +213,6 @@ func (e ONENS) handleTXT(name string, domain string, contentHash []byte) ([]dns.
 
 func (e ONENS) handleA(name string, domain string, contentHash []byte) ([]dns.RR, error) {
 	results := make([]dns.RR, 0)
-	fmt.Println("Handling A Record")
 	aRRSet, err := e.obtainARRSet(name, domain)
 	if err == nil && len(aRRSet) != 0 {
 		// We have an A rrset; use it
@@ -312,20 +305,6 @@ func (e ONENS) obtainAAAARRSet(name string, domain string) ([]byte, error) {
 
 	return resolver.Record(name, dns.TypeAAAA)
 }
-
-// func (e ONENS) obtainContentHash(name string, domain string) ([]byte, error) {
-// 	ethDomain := strings.TrimSuffix(domain, ".")
-// 	fmt.Printf("obtainContentHash name: %s domain: %s ethDomain: %s\n", name, domain, ethDomain)
-// 	resolver, err := e.getResolver(ethDomain)
-// 	fmt.Printf("resolver %+v\n", resolver)
-// 	fmt.Printf("err: %+v\n", err)
-// 	if err != nil {
-// 		fmt.Println("Have Error")
-// 		return []byte{}, nil
-// 	}
-// 	fmt.Println("Have Resolver")
-// 	return resolver.Contenthash()
-// }
 
 func (e ONENS) obtainTXTRRSet(name string, domain string) ([]byte, error) {
 	ethDomain := strings.TrimSuffix(domain, ".")

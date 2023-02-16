@@ -25,7 +25,6 @@ func setupONENS(c *caddy.Controller) error {
 		return plugin.Error("onens", err)
 	}
 
-	fmt.Printf("connection: %+v\n", connection)
 	client, err := ethclient.Dial(connection)
 	if err != nil {
 		return plugin.Error("onens", err)
