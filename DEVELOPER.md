@@ -22,6 +22,16 @@ go build
 
 ```
 
+**Adding a package**
+
+```
+# Get the package
+go get github.com/coredns/coredns/plugin/pkg/upstream
+
+# Modify the code to use the package
+
+```
+
 ## Updating configuration
 There are two configurtion files needed included in the repository and copied at time of bulding the standalone test environment
 * `.env` contains environment variables for go-1ns including client connection info and deployed contract addresses

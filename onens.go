@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/coredns/coredns/plugin"
+	"github.com/coredns/coredns/plugin/pkg/upstream"
 	"github.com/coredns/coredns/request"
 	"github.com/ethereum/go-ethereum/ethclient"
 	lru "github.com/hashicorp/golang-lru"
@@ -26,6 +27,8 @@ type ONENS struct {
 	Client             *ethclient.Client
 	Registry           *onens.Registry
 	EthLinkNameServers []string
+	// Upstream for looking up external names during the resolution process.
+	Upstream *upstream.Upstream
 }
 
 // IsAuthoritative checks if the ONENS plugin is authoritative for a given domain
@@ -62,7 +65,7 @@ func (e ONENS) HasRecords(domain string, name string) (bool, error) {
 // Query queries a given domain/name/resource combination
 func (e ONENS) Query(domain string, name string, qtype uint16, do bool) ([]dns.RR, error) {
 	log.Debugf("request type %d for name %s in domain %v", qtype, name, domain)
-	fmt.Printf("request type %d for name %s in domain %v \nHi\n", qtype, name, domain)
+	fmt.Printf("In onens query: request type %d for name %s in domain %v \n", qtype, name, domain)
 
 	results := make([]dns.RR, 0)
 
@@ -71,7 +74,10 @@ func (e ONENS) Query(domain string, name string, qtype uint16, do bool) ([]dns.R
 	if err != nil {
 		return results, nil
 	}
+	fmt.Printf("In onens query- name: %+v\n", name)
+	fmt.Printf("In onens query- qtype: %+v\n", qtype)
 	data, err := resolver.Record(name, qtype)
+	fmt.Printf("In onens query- data: %+v\n", data)
 	if err != nil {
 		return results, err
 	}
@@ -87,6 +93,28 @@ func (e ONENS) Query(domain string, name string, qtype uint16, do bool) ([]dns.R
 	}
 
 	return results, nil
+}
+
+func (e ONENS) ExternalLookup(ctx context.Context, state request.Request, target string, qtype uint16) ([]dns.RR, Result) {
+	fmt.Printf("In External Lookup: qtype: %+v\n", qtype)
+	fmt.Printf("In External Lookup: target: %+v\n", target)
+	m, err := e.Upstream.Lookup(ctx, state, target, qtype)
+	if err != nil {
+		return nil, ServerFailure
+	}
+	if m == nil {
+		return nil, Success
+	}
+	if m.Rcode == dns.RcodeNameError {
+		return m.Answer, NameError
+	}
+	if m.Rcode == dns.RcodeServerFailure {
+		return m.Answer, ServerFailure
+	}
+	if m.Rcode == dns.RcodeSuccess && len(m.Answer) == 0 {
+		return m.Answer, NoData
+	}
+	return m.Answer, Success
 }
 
 func (e ONENS) handleSOA(name string, domain string, contentHash []byte) ([]dns.RR, error) {
@@ -239,7 +267,7 @@ func (e ONENS) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (
 	a.Compress = true
 	a.Authoritative = true
 	var result Result
-	a.Answer, a.Ns, a.Extra, result = Lookup(e, state)
+	a.Answer, a.Ns, a.Extra, result = Lookup(e, state, ctx)
 	switch result {
 	case Success:
 		state.SizeAndDo(a)

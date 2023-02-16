@@ -7,6 +7,7 @@ import (
 	"github.com/coredns/caddy"
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
+	"github.com/coredns/coredns/plugin/pkg/upstream"
 	"github.com/ethereum/go-ethereum/ethclient"
 	onens "github.com/jw-1ns/go-1ns"
 )
@@ -37,14 +38,26 @@ func setupONENS(c *caddy.Controller) error {
 		return plugin.Error("onens", err)
 	}
 
+	p := &ONENS{
+		Client:             client,
+		EthLinkNameServers: ethLinkNameServers,
+		Registry:           registry,
+		Upstream:           upstream.New(),
+	}
+
 	dnsserver.GetConfig(c).AddPlugin(func(next plugin.Handler) plugin.Handler {
-		return ONENS{
-			Next:               next,
-			Client:             client,
-			EthLinkNameServers: ethLinkNameServers,
-			Registry:           registry,
-		}
+		p.Next = next
+		return p
 	})
+
+	// dnsserver.GetConfig(c).AddPlugin(func(next plugin.Handler) plugin.Handler {
+	// 	return ONENS{
+	// 		Next:               next,
+	// 		Client:             client,
+	// 		EthLinkNameServers: ethLinkNameServers,
+	// 		Registry:           registry,
+	// 	}
+	// })
 
 	return nil
 }
