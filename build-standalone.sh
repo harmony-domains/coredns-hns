@@ -11,7 +11,7 @@ echo "Cloning coredns repo..."
 git clone https://github.com/coredns/coredns.git
 
 cd coredns
-git checkout v1.10.0
+git checkout v1.10.1
 
 echo "Patching plugin config..."
 ed plugin.cfg <<EOED

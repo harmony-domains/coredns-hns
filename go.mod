@@ -1,11 +1,11 @@
 module github.com/jw-1ns/coredns-1ns
 
-go 1.19
+go 1.20
 
 require (
 	github.com/coredns/caddy v1.1.1
 	github.com/coredns/coredns v1.10.1
-	github.com/ethereum/go-ethereum v1.11.0
+	github.com/ethereum/go-ethereum v1.11.1
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d
 	github.com/jw-1ns/go-1ns v0.1.5
 	github.com/labstack/gommon v0.4.0
@@ -69,7 +69,7 @@ require (
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
-	google.golang.org/genproto v0.0.0-20230209215440-0dfe4f8abfcc // indirect
+	google.golang.org/genproto v0.0.0-20230216225411-c8e22ba71e44 // indirect
 	google.golang.org/grpc v1.53.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
