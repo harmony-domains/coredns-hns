@@ -1,5 +1,13 @@
 # coredns-1ns developer guide
 
+## Overview
+
+coredns-1ns is a plugin used for dns lookup in [coredns](https://github.com/coredns/coredns). It utilized go-1ns to interact with the 1ns web3 backend deployed by [ens-deployer](https://github.com/polymorpher/ens-deployer).
+
+TODO
+
+* enhance test to support new functionality. e.g. ExternalLookup
+
 ## Quick start
 
 ```bash

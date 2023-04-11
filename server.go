@@ -38,7 +38,7 @@ type Server interface {
 	// supplied domain
 	IsAuthoritative(qdomain string) bool
 
-	// External lookup is used to retrieve ecternal records for CNAME and DNAME querie
+	// External lookup is used to retrieve external records for CNAME and DNAME querie
 	ExternalLookup(ctx context.Context, state request.Request, target string, qtype uint16) ([]dns.RR, Result)
 }
 
