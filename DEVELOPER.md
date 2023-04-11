@@ -2,7 +2,7 @@
 
 ## Quick start
 
-```
+```bash
 # Clone the repository 
 git clone https://github.com/jw-1ns/coredns-1ns.git
 cd coredns-1ns
@@ -22,9 +22,9 @@ go build
 
 ```
 
-**Adding a package**
+Adding a package
 
-```
+```bash
 # Get the package
 go get github.com/coredns/coredns/plugin/pkg/upstream
 
@@ -33,11 +33,13 @@ go get github.com/coredns/coredns/plugin/pkg/upstream
 ```
 
 ## Updating configuration
+
 There are two configurtion files needed included in the repository and copied at time of bulding the standalone test environment
+
 * `.env` contains environment variables for go-1ns including client connection info and deployed contract addresses
 * `Corefile` contains zone and server information see [here](https://coredns.io/2017/07/23/corefile-explained/) for more information.
-## Running go tests
 
+## Running go tests
 
 ## End to End Local Testing
 
@@ -45,36 +47,35 @@ For the following it is assumed that ens-deployer and coredns-1ns have the same 
 
 Start a local ganache instance
 
-```
+```bash
 cd ens-deployer/env
 ./ganache-new.sh
 ```
 
 Deploy ens contracts, register test.country and create config records for them
 
-```
+```bash
 cd ens-deployer/contract
-yarn deploy --network local
+yarn deploy-sample
 
 ```
-
 
 Build local coredns and copy Corefile.local to local
 
-```
+```bash
 cd coredns-1ns
 ./build-standalone.sh
 ```
 
 Start coredns
 
-```
+```bash
 ./coredns
 ```
 
 Test we are retrieving the dns records succesfully
 
-```
+```bash
 # test retreival of stored DNS test record
 dig @127.0.0.1 -p 53 test.country
 
@@ -83,24 +84,20 @@ dig @127.0.0.1 -p 53 www.example.com
 
 ```
 
-
-
-
 ## Publishing new versions
 
 See [here](https://go.dev/doc/modules/publishing) and [here](https://go.dev/blog/publishing-go-modules).
 
-```
+```bash
 git tag v0.1.2
 git push origin v0.1.2
 ```
-
 
 ## Appendices
 
 ### Appendix A sample local Corefile
 
-```
+```bash
 . {
     whoami  # coredns.io/plugins/whoami
     log     # coredns.io/plugins/log
@@ -128,4 +125,42 @@ git push origin v0.1.2
     }
     forward . 8.8.8.8 9.9.9.9 # Forward all requests to Google Public DNS (8.8.8.8) and Quad9 DNS (9.9.9.9).
 }
+```
+
+### Appendix B sample dig commands for local testing
+
+```bash
+# Get A records (initARecFQDN, initARecAFQDN)
+cd 
+dig @127.0.0.1 a in -p 53 recurse=false a.test.country 
+
+# Get CNAME record (initCnameRecOneFQDN, initCnameRecWWW)
+dig @127.0.0.1  cname in -p 53 recurse=false one.test.country
+dig @127.0.0.1 cname in -p 53 recurse=false www.test.country
+dig @127.0.0.1  in -p 53 recurse=false one.test.country
+
+# Get SOA record (InitialSoaRecord)
+dig @127.0.0.1 soa in -p 53 recurse=false test.country
+
+# Get TXT record
+# const [initTxtRec] = dns.encodeTXTRecord({ name: FQDN, text: 'magic' })
+dig @127.0.0.1 txt in -p 53 recurse=false test.country
+
+# TestSubdomainOneInitialNSnameRecord
+const [initNsRec] = dns.encodeNSRecord({ name: FQDN, nsname: 'ns3.hiddenstate.xyz' })
+dig @127.0.0.1 ns in -p 53 recurse=false test.country
+
+# InitialSrvRecord
+# const [initSrvRec] = dns.encodeSRVRecord({ name: 'srv.' + FQDN, rvalue: DefaultSrv })
+dig @127.0.0.1 srv in -p 53 recurse=false srv.test.country
+
+
+# Not Working 
+
+# const [initCnameRecWWW] = dns.encodeCNAMERecord({ name: 'www', cname: 'test.country' })
+dig @127.0.0.1 cname in -p 53 recurse=false www
+
+# initDnameRec
+# const [initDnameRec] = dns.encodeDNAMERecord({ name: 'docs.' + FQDN, dname: 'docs.harmony.one' })
+dig @127.0.0.1 dname in -p 53 recurse=false docs.test.country
 ```

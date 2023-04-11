@@ -1,6 +1,6 @@
 module github.com/coredns/coredns
 
-go 1.17
+go 1.20
 
 require (
 	github.com/Azure/azure-sdk-for-go v66.0.0+incompatible
@@ -96,7 +96,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/jw-1ns/go-1ns v0.1.5 // indirect
+	github.com/jw-1ns/go-1ns v0.1.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.3 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

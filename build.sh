@@ -1,10 +1,13 @@
 #!/bin/bash
 set -e
 
-SRCDIR=~/coredns-1n
-BUILDDIR=~/coredns-1n/build
+SRCDIR=`pwd`
+BUILDDIR=`pwd`/build
 
-mkdir -p ${BUILDDIR} 2>/dev/null
+rm -rf build
+
+# mkdir -p ${BUILDDIR} 2>/dev/null
+mkdir -p ${BUILDDIR}
 cd ${BUILDDIR}
 echo "Cloning coredns repo..."
 git clone https://github.com/coredns/coredns.git
@@ -13,12 +16,12 @@ cd coredns
 git checkout v1.10.1
 
 echo "Patching plugin config..."
-cp ../coredns-plugin.cfg plugin.cfg
+cp ../../coredns-plugin.cfg plugin.cfg
 
 # Add our module to coredns.
 echo "YOU NEED to add this line to go.mod"
 echo "	github.com/jw-1ns/coredns-1ns v0.1.2"
-cp ../coredns-go.mod go.mod
+cp ../../coredns-go.mod go.mod
 
 go get github.com/jw-1ns/coredns-1ns@v0.1.2
 go get

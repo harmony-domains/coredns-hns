@@ -5,7 +5,8 @@ SRCDIR=`pwd`
 BUILDDIR=`pwd`/build
 
 rm -rf ${BUILDDIR}
-mkdir -p ${BUILDDIR} 2>/dev/null
+# mkdir -p ${BUILDDIR} 2>/dev/null
+mkdir -p ${BUILDDIR} 
 cd ${BUILDDIR}
 echo "Cloning coredns repo..."
 git clone https://github.com/coredns/coredns.git
